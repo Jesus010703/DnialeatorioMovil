@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta DNI</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #0e2f44;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    .input-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    input {
+        padding: 10px;
+        font-size: 18px;
+        width: 200px;
+        border-radius: 5px;
+        border: none;
+    }
+    button {
+        background: #ff6600;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    button:hover {
+        background: #e05500;
+    }
+    pre {
+        background: #1a4a61;
+        padding: 15px;
+        border-radius: 5px;
+        text-align: left;
+        max-width: 600px;
+        margin: 20px auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    /* 📱 Ajustes para pantallas móviles */
+    @media (max-width: 600px) {
+        body {
+            padding: 10px;
+        }
+        h1 {
+            font-size: 1.5em;
+        }
+        input {
+            width: 100%;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            font-size: 16px;
+        }
+        pre {
+            font-size: 14px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<h1>Consulta de DNI</h1>
+
+<div class="input-container">
+    <input type="text" id="dni" placeholder="Ingrese DNI">
+    <button id="btnConsultar">Consultar</button>
+    <button id="btnAleatorio">DNI Aleatorio</button>
+</div>
+
+<pre id="resultado">Aquí aparecerán los datos...</pre>
+
+<script>
+const API_URL = "https://api.consultasperu.com/api/v1/query";
+const TOKEN = "605db0be586491e0baf1279db67bddbe57d7a04353030c10e649677bc44a5d0e";
+
+// Generar DNI válido
+function generarDNI() {
+    const prefijos = ["1", "4", "7"];
+    let numero = prefijos[Math.floor(Math.random() * prefijos.length)];
+    while (numero.length < 7) {
+        numero += Math.floor(Math.random() * 10);
+    }
+    numero += calcularDigitoLuhn(numero);
+    return numero;
+}
+
+// Algoritmo de Luhn
+function calcularDigitoLuhn(numero) {
+    let suma = 0;
+    let invertir = true;
+    for (let i = numero.length - 1; i >= 0; i--) {
+        let digito = parseInt(numero[i]);
+        if (invertir) {
+            digito *= 2;
+            if (digito > 9) digito -= 9;
+        }
+        suma += digito;
+        invertir = !invertir;
+    }
+    return (10 - (suma % 10)) % 10;
+}
+
+// Mostrar datos
+function mostrarDatosEnEspanol(data) {
+    if (!data.success || !data.data) {
+        return "❌ No se encontraron datos para este DNI.";
+    }
+
+    const d = data.data;
+    return `
+📄 DNI: ${d.number}
+👤 Nombre completo: ${d.full_name}
+📝 Nombres: ${d.name}
+📝 Apellidos: ${d.surname}
+🔢 Código de verificación: ${d.verification_code}
+👨‍👩‍👧 Primer apellido: ${d.first_last_name}
+👨‍👩‍👧 Segundo apellido: ${d.second_last_name}
+🎂 Fecha de nacimiento: ${d.date_of_birth}
+⚧ Género: ${d.gender}
+🏙 Departamento: ${d.department}
+🏛 Provincia: ${d.province}
+🏘 Distrito: ${d.district}
+📍 Dirección: ${d.address}
+📍 Dirección completa: ${d.address_complete}
+🌐 Ubigeo: ${d.ubigeo}
+🌐 Ubigeo SUNAT: ${d.ubigeo_sunat}
+    `.trim();
+}
+
+// Consultar API
+async function consultarAPI(dni) {
+    document.getElementById("resultado").textContent = "🔄 Consultando...";
+    
+    let respuesta = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token: TOKEN,
+            type_document: "dni",
+            document_number: dni
+        })
+    });
+    
+    let data = await respuesta.json();
+    document.getElementById("resultado").textContent = mostrarDatosEnEspanol(data);
+}
+
+// Eventos
+document.getElementById("btnConsultar").addEventListener("click", () => {
+    let dni = document.getElementById("dni").value.trim();
+    if (dni) {
+        consultarAPI(dni);
+    } else {
+        alert("Por favor, ingrese un DNI.");
+    }
+});
+
+document.getElementById("btnAleatorio").addEventListener("click", () => {
+    let dniAleatorio = generarDNI();
+    document.getElementById("dni").value = dniAleatorio;
+    consultarAPI(dniAleatorio);
+});
+</script>
+
+</body>
+</html>
