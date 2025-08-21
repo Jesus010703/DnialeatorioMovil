@@ -5,7 +5,7 @@ import random
 app = Flask(__name__)
 
 URL = "https://api.consultasperu.com/api/v1/query"
-TOKEN = "605db0be586491e0baf1279db67bddbe57d7a04353030c10e649677bc44a5d0e"
+TOKEN = "04ba31a0400a2f7954c7e883008269c938aecbaf37bd995770f688d3de0d726a"
 
 def calcular_digito_luhn(numero):
     suma = 0
@@ -44,4 +44,5 @@ def consultar():
     return jsonify(response.json())
 
 if __name__ == "__main__":
+
     app.run(debug=True)
