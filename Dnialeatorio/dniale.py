@@ -5,7 +5,7 @@ import random
 app = Flask(__name__)
 
 URL = "https://api.consultasperu.com/api/v1/query"
-TOKEN = "04ba31a0400a2f7954c7e883008269c938aecbaf37bd995770f688d3de0d726a"
+TOKEN = "448a6f713291cd0ca30de8f889f6262516668b4bf0f6ec0d477b2bd348029407"
 
 def calcular_digito_luhn(numero):
     suma = 0
@@ -46,3 +46,4 @@ def consultar():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
